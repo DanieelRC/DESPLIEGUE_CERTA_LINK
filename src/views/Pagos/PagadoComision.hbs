@@ -1,0 +1,62 @@
+<!-- INICIO DEL CÓDIGO ADAPTADO AL NUEVO CSS -->
+<div class="container mt-5">
+    <div class="card shadow-lg p-4">
+        <!-- Cabecera personalizada con tu color primario -->
+        <div class="card-header text-center mb-3">
+            <h3 class="m-0">Detalles del Pago por Comisión</h3>
+        </div>
+
+        <!-- Cuerpo de la tarjeta -->
+        <div class="card-body">
+            <!-- FOLIO -->
+            <div class="form-group mb-3">
+                <label for="folio">Folio:</label>
+                <input type="text" id="folio" class="form-control" value="{{folio}}" readonly />
+            </div>
+
+            <!-- MONTO TOTAL -->
+            <div class="form-group mb-3">
+                <label for="monto_total">Monto Total:</label>
+                <input type="number" id="monto_total" class="form-control" value="{{monto_total}}" readonly />
+            </div>
+
+            <!-- PORCENTAJE CAJA & RETENCIÓN -->
+            <div class="row g-3 mb-3">
+                <div class="col">
+                    <div class="form-group">
+                        <label for="porcentajeCaja">Porcentaje Comisión Fija (7%):</label>
+                        <input type="number" id="porcentajeCaja" class="form-control" value="{{porcentajeCaja}}"
+                            readonly />
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <label for="retencion">Retención (Comisión real):</label>
+                        <input type="number" id="retencion" class="form-control" value="{{retencion}}" readonly />
+                    </div>
+                </div>
+            </div>
+
+            <!-- GANANCIA VERDADERA -->
+            <div class="form-group mb-3">
+                <label for="ganancia_verdadera">
+                    Ganancia Verdadera (Porcentaje Caja - Comisión ideal):
+                </label>
+                <input type="number" id="ganancia_verdadera" class="form-control" value="{{ganancia}}" readonly />
+            </div>
+
+            <!-- Cantidad a depositar -->
+            <div class="form-group mb-3">
+                <label for="ganancia_verdadera">
+                    Cantidad a depositar:
+                </label>
+                <input type="number" id="ganancia_verdadera" class="form-control" value="{{a_depositar}}" readonly />
+            </div>
+
+
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS (opcional, si usas modales) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

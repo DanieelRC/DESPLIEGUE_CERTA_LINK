@@ -1,0 +1,83 @@
+<!-- INICIO DEL CÓDIGO ADAPTADO AL NUEVO CSS -->
+<div class="container mt-5 d-flex justify-content-center">
+  <!-- Envolvemos el formulario en una tarjeta con sombra -->
+  <div class="card shadow-lg admin-card-width p-4">
+    <form method="post" action="../Folio/CrearFolio">
+      <!-- Campo oculto para el tipo de folio -->
+      <input type="hidden" name="TipoFolio" value="{{TipoFolio}}" />
+
+      <!-- Título -->
+      <h2 class="text-center mb-4" style="color: var(--primary-blue);">
+        Crear Folio
+      </h2>
+
+      <!-- Habitación -->
+      <div class="form-group mb-3">
+        <label for="Habitacion">Habitación</label>
+        <input class="form-control" type="text" name="Habitacion" id="Habitacion" placeholder="Ingrese la habitación"
+          autofocus required />
+      </div>
+
+      <!-- Paciente -->
+      <div class="form-group mb-3">
+        <label for="Paciente">Paciente</label>
+        <input class="form-control" type="text" name="Paciente" id="Paciente"
+          placeholder="Ingrese el nombre del paciente" required />
+      </div>
+
+      <!-- Médico -->
+      <div class="form-group mb-3">
+        <label for="Medico">Médico</label>
+        <select id="Medico" name="Medico" class="form-control">
+          {{#each Medicos}}
+          <option value="{{correo}}">
+            {{nombre}} {{apellido_p}} {{apellido_m}}
+          </option>
+          {{/each}}
+        </select>
+      </div>
+
+      <!-- Campos dinámicos según el tipo de folio -->
+      {{#if (eq TipoFolio "Particulares")}}
+      <!-- Monto -->
+      <div class="form-group mb-3">
+        <label for="Monto">Monto</label>
+        <input class="form-control" type="number" name="Monto" id="Monto" step="0.01"
+          placeholder="Ingrese el monto total" required />
+      </div>
+      {{else}}
+      <!-- Aseguradora -->
+      <div class="form-group mb-3">
+        <label for="Aseguradora">Aseguradora</label>
+        <select id="Aseguradora" name="Aseguradora" class="form-control">
+          {{#each Seguros}}
+          <option value="{{id_seguro}}">
+            {{id_seguro}}
+          </option>
+          {{/each}}
+        </select>
+      </div>
+      <!-- Informe Médico -->
+      <div class="form-group mb-3">
+        <label for="Informe_medico">Informe Médico</label>
+        <input class="form-control" type="text" maxlength="9" name="Informe_medico" id="Informe_medico"
+          placeholder="Ingrese el informe médico" required />
+      </div>
+      <!-- Seguimiento -->
+      <div class="form-group mb-3">
+        <label for="Seguimiento">Seguimiento</label>
+        <textarea class="form-control" maxlength="200" name="Seguimiento" id="Seguimiento"
+          placeholder="Agregue un seguimiento detallado"></textarea>
+      </div>
+      {{/if}}
+
+      <!-- Botón para crear folio -->
+      <div class="mt-4">
+        <!-- Reemplazamos .btn-success por .btn-crear para mantener la paleta -->
+        <button type="submit" class="btn btn-crear w-100">
+          Crear Folio
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

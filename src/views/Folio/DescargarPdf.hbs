@@ -1,0 +1,34 @@
+<script defer>
+    window.onload = async function () {
+        // Iniciar la descarga
+        var a = document.createElement('a');
+        a.href = "{{pdfUrl}}";
+        a.setAttribute('download', '');
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        // Llamar al servidor para eliminar el archivo temporal
+        try {
+            const response = await fetch("/Folio/pdf/delete", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ filePath: "{{tempFilePath}}" })
+            });
+            if (!response.ok) {
+                console.error("Error al eliminar el archivo temporal");
+            }
+        } catch (err) {
+            console.error("Error en la petición de eliminación:", err);
+        }
+
+        // Redireccionar después de un breve intervalo
+        setTimeout(function () {
+            window.location.href = "/AdministracionFolios";
+        }, 10);
+    };
+</script>
+
+<p>Si la descarga no inicia automáticamente, haz clic <a href="{{pdfUrl}}" target="_blank" download>Aquí</a>.</p>

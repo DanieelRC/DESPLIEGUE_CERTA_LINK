@@ -1,0 +1,454 @@
+<div class="container mt-5">
+  <!-- TÍTULO -->
+  <h2 class="text-center mb-4">Gestión de Seguros</h2>
+
+  <!-- Barra de búsqueda -->
+  <div class="mb-4 text-center">
+    <input type="text" id="searchInput" class="form-control w-50 mx-auto"
+      placeholder="Buscar folio, paciente o médico...">
+  </div>
+
+  <!-- Botón "Regresar" -->
+  <div class="d-flex justify-content-center mb-4">
+    <a href="/AdministracionFolios" class="btn btn-danger w-50">Regresar</a>
+  </div>
+
+  <!-- Contenedor principal -->
+  <div class="row mt-5 justify-content-center">
+    {{#if datos}}
+    <div id="foliosContainer" class="grid grid-2" style="width: 80%;">
+      {{#each datos}}
+      <div class="card shadow-lg p-3 mb-3 folio-card" data-folio="{{this.Folio}}">
+        <h4 class="mb-2"><strong>Folio:</strong> {{this.Folio}}</h4>
+        <p class="mb-1"><strong>Habitación:</strong> {{this.Habitacion}}</p>
+        <p class="mb-1"><strong>Fecha:</strong> {{this.Fecha}}</p>
+        <p class="mb-1"><strong>Paciente:</strong> {{this.Paciente}}</p>
+        <p class="mb-1"><strong>Médico:</strong> {{this.Medico_Nombre}} {{this.Medico_Apellido_P}}
+          {{this.Medico_Apellido_M}}</p>
+
+        <div class="d-grid gap-2">
+          <!-- PASO 1: Guardar Solicitud de Carta -->
+          {{#unless this.Seguros.solicitud_carta}}
+          <button class="btn btn-primary btn-sm guardarFecha" data-folio="{{this.Folio}}">
+            Guardar Solicitud de Carta
+          </button>
+          {{/unless}}
+
+          <!-- PASO 2: Ingresar Tabulación -->
+          {{#if this.Seguros.solicitud_carta}}
+          {{#unless this.Seguros.tabulacion}}
+          <input type="number" class="form-control mt-2 tabulacion" data-folio="{{this.Folio}}"
+            placeholder="Ingrese la tabulación">
+          <button class="btn btn-info btn-sm mt-2 guardarTabulacion" data-folio="{{this.Folio}}">
+            Guardar Tabulación
+          </button>
+          {{/unless}}
+          {{/if}}
+
+          <!-- PASO 3: Ingresar CFDI -->
+          {{#if this.Seguros.tabulacion}}
+          {{#unless this.Seguros.cfdi}}
+          <input type="text" class="form-control mt-2 cfdi" data-folio="{{this.Folio}}" placeholder="Ingrese CFDI">
+          <button class="btn btn-info btn-sm mt-2 ingresarCFDI" data-folio="{{this.Folio}}">
+            Guardar CFDI
+          </button>
+          {{/unless}}
+          {{/if}}
+
+          <!-- PASO 4: Ingreso de Factura + Folio de Ingreso -->
+          {{#if this.Seguros.cfdi}}
+          {{#unless this.Seguros.ingreso_factura}}
+          <input type="text" class="form-control mt-2 folioDeIngreso" data-folio="{{this.Folio}}"
+            placeholder="Ingrese Folio de Ingreso">
+          <button class="btn btn-success btn-sm mt-2 guardarFolioIngreso" data-folio="{{this.Folio}}">
+            Guardar Folio de Ingreso
+          </button>
+          {{/unless}}
+          {{/if}}
+
+          <!-- PASO 5: Confirmar Pago -->
+          {{#if this.Seguros.ingreso_factura}}
+          {{#unless this.Seguros.fecha_pago}}
+          <button class="btn btn-success btn-sm mt-2 confirmarPago" data-folio="{{this.Folio}}">
+            Confirmar Pago
+          </button>
+          {{/unless}}
+          {{/if}}
+
+          <!-- PASO 6: CFDI Complemento (Sí/No) -->
+          {{#if this.Seguros.fecha_pago}}
+          {{#unless this.Seguros.cfdi_complemento}}
+          <p class="mt-2 fw-bold">¿Agregar CFDI Complemento?</p>
+          <button class="btn btn-info btn-sm mt-2 confirmarCFDIComplemento" data-folio="{{this.Folio}}">
+            Sí
+          </button>
+          <button class="btn btn-danger btn-sm mt-2 rechazarCFDIComplemento" data-folio="{{this.Folio}}">
+            No
+          </button>
+          {{/unless}}
+          {{/if}}
+        </div>
+      </div>
+      {{/each}}
+    </div>
+
+    <!-- Paginación -->
+    <div class="mt-4 d-flex justify-content-center align-items-center gap-3">
+      <button id="prevPage" class="btn btn-outline-secondary-custom" disabled>&#8592; Anterior</button>
+      <span id="paginationInfo">Página 1 de X</span>
+      <button id="nextPage" class="btn btn-outline-secondary-custom">&rarr; Siguiente</button>
+    </div>
+
+    {{else}}
+    <div class="card mx-auto" style="max-width: 300px;">
+      <div class="card-header text-center">
+        <h3 class="m-0">Crea un folio</h3>
+      </div>
+      <div class="card-body text-center">
+        <a href="../Folio/CrearFolio?tipoFolio=Seguros" class="btn btn-success btn-lg w-100">Crear Folio</a>
+      </div>
+    </div>
+    {{/if}}
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const searchInput = document.getElementById("searchInput");
+    const foliosContainer = document.getElementById("foliosContainer");
+    const folios = Array.from(document.querySelectorAll(".folio-card"));
+    const paginationInfo = document.getElementById("paginationInfo");
+    const prevPageBtn = document.getElementById("prevPage");
+    const nextPageBtn = document.getElementById("nextPage");
+
+    let currentPage = 1;
+    let itemsPerPage = 4;
+    let allFolios = [...folios];
+    let filteredFolios = [...folios];
+
+    // --- Custom Modal Function ---
+    function showCustomModal(title, message, type = 'info', onOk = null, showCancel = false) {
+      // Remove existing modal if any
+      const existingModal = document.getElementById('customModal');
+      if (existingModal) {
+        existingModal.remove();
+      }
+
+      // Create modal elements
+      const modalOverlay = document.createElement('div');
+      modalOverlay.id = 'customModal';
+      modalOverlay.className = 'custom-modal-overlay';
+
+      const modal = document.createElement('div');
+      modal.className = `custom-modal modal-${type}`; // Add type class
+
+      const modalHeader = document.createElement('div');
+      modalHeader.className = 'custom-modal-header';
+      modalHeader.innerHTML = `<h5>${title}</h5><button type="button" class="custom-modal-close">&times;</button>`;
+
+      const modalBody = document.createElement('div');
+      modalBody.className = 'custom-modal-body';
+      modalBody.innerHTML = `<p>${message}</p>`; // Use innerHTML to allow basic formatting if needed
+
+      const modalFooter = document.createElement('div');
+      modalFooter.className = 'custom-modal-footer';
+
+      const okButton = document.createElement('button');
+      okButton.className = 'btn btn-primary btn-sm'; // Use Bootstrap classes or custom ones
+      okButton.textContent = 'Aceptar';
+
+      modalFooter.appendChild(okButton);
+
+      if (showCancel) {
+        const cancelButton = document.createElement('button');
+        cancelButton.className = 'btn btn-secondary btn-sm'; // Use Bootstrap classes or custom ones
+        cancelButton.textContent = 'Cancelar';
+        modalFooter.appendChild(cancelButton);
+        cancelButton.addEventListener('click', closeModal);
+      }
+
+      // Assemble modal
+      modal.appendChild(modalHeader);
+      modal.appendChild(modalBody);
+      modal.appendChild(modalFooter);
+      modalOverlay.appendChild(modal);
+
+      // Add to body
+      document.body.appendChild(modalOverlay);
+
+      // Show modal with transition
+      setTimeout(() => modalOverlay.classList.add('show'), 10); // Small delay for transition
+
+      // Event listeners
+      const closeButton = modalHeader.querySelector('.custom-modal-close');
+      closeButton.addEventListener('click', closeModal);
+      okButton.addEventListener('click', () => {
+        closeModal();
+        if (typeof onOk === 'function') {
+          onOk(); // Execute callback after closing
+        }
+      });
+      modalOverlay.addEventListener('click', (e) => {
+        if (e.target === modalOverlay) { // Close only if clicking the overlay itself
+          closeModal();
+        }
+      });
+
+      function closeModal() {
+        modalOverlay.classList.remove('show');
+        // Remove modal from DOM after transition ends
+        modalOverlay.addEventListener('transitionend', () => {
+          if (modalOverlay.parentNode) {
+            modalOverlay.remove();
+          }
+        }, { once: true });
+      }
+    }
+    // --- End Custom Modal Function ---
+
+
+    // 🔹 Guardar Solicitud de Carta
+    document.querySelectorAll(".guardarFecha").forEach(btn => {
+      btn.addEventListener("click", async function () {
+        const folio = this.dataset.folio;
+        const response = await actualizarSeguro(folio, { solicitud_carta: obtenerFechaActual() });
+
+        if (response.success) {
+          // alert("Solicitud de carta guardada correctamente.");
+          showCustomModal('Éxito', 'Solicitud de carta guardada correctamente.', 'success', () => {
+            location.reload();
+          });
+        } else {
+          showCustomModal('Error', 'No se pudo guardar la solicitud de carta.', 'error');
+        }
+      });
+    });
+
+    // 🔹 Guardar Tabulación
+    document.querySelectorAll(".guardarTabulacion").forEach(btn => {
+      btn.addEventListener("click", async function () {
+        const folio = this.dataset.folio;
+        const inputTabulacion = document.querySelector(`.tabulacion[data-folio="${folio}"]`);
+        const tabulacion = inputTabulacion.value;
+
+        if (tabulacion) {
+          const response = await actualizarSeguro(folio, {
+            tabulacion,
+            recepcion_carta: obtenerFechaActual(),
+            solicitud_factura: obtenerFechaActual()
+          });
+
+          if (response.success) {
+            // alert("Tabulación guardada correctamente. Monto ingresado: " + tabulacion);
+            showCustomModal('Éxito', `Tabulación guardada correctamente. \nMonto ingresado: ${tabulacion}`, 'success', () => {
+              location.reload();
+            });
+          } else {
+            showCustomModal('Error', 'No se pudo guardar la tabulación.', 'error');
+          }
+        } else {
+          // alert("Debe ingresar un monto de tabulación antes de continuar.");
+          showCustomModal('Advertencia', 'Debe ingresar un monto de tabulación antes de continuar.', 'warning');
+        }
+      });
+    });
+
+    // 🔹 Guardar CFDI
+    document.querySelectorAll(".ingresarCFDI").forEach(btn => {
+      btn.addEventListener("click", async function () {
+        const folio = this.dataset.folio;
+        const cfdiInput = document.querySelector(`.cfdi[data-folio="${folio}"]`);
+        const cfdi = cfdiInput.value;
+
+        if (cfdi) {
+          const response = await actualizarSeguro(folio, { cfdi });
+
+          if (response.success) {
+            // alert("CFDI guardado correctamente. CFDI ingresado: " + cfdi);
+            showCustomModal('Éxito', `CFDI guardado correctamente. \nCFDI ingresado: ${cfdi}`, 'success', () => {
+              location.reload();
+            });
+          } else {
+            showCustomModal('Error', 'No se pudo guardar el CFDI.', 'error');
+          }
+        } else {
+          // alert("Debe ingresar un CFDI antes de continuar.");
+          showCustomModal('Advertencia', 'Debe ingresar un CFDI antes de continuar.', 'warning');
+        }
+      });
+    });
+
+    // 🔹 Guardar Folio de Ingreso
+    document.querySelectorAll(".guardarFolioIngreso").forEach(btn => {
+      btn.addEventListener("click", async function () {
+        const folio = this.dataset.folio;
+        const inputFolioIngreso = document.querySelector(`.folioDeIngreso[data-folio="${folio}"]`);
+        const folioDeIngreso = inputFolioIngreso.value;
+
+        if (folioDeIngreso) {
+          const response = await actualizarSeguro(folio, { folio_de_ingreso: folioDeIngreso });
+
+          if (response.success) {
+            // alert("Folio de ingreso guardado correctamente. Folio ingresado: " + folioDeIngreso);
+            showCustomModal('Éxito', `Folio de ingreso guardado correctamente. \nFolio ingresado: ${folioDeIngreso}`, 'success', () => {
+              location.reload();
+            });
+          } else {
+            showCustomModal('Error', 'No se pudo guardar el Folio de Ingreso.', 'error');
+          }
+        } else {
+          // alert("Debe ingresar un Folio de Ingreso antes de continuar.");
+          showCustomModal('Advertencia', 'Debe ingresar un Folio de Ingreso antes de continuar.', 'warning');
+        }
+      });
+    });
+
+
+    // 🔹 Confirmar Pago
+    document.querySelectorAll(".confirmarPago").forEach(btn => {
+      btn.addEventListener("click", async function () {
+        const folio = this.dataset.folio;
+        const response = await actualizarSeguro(folio, { fecha_pago: obtenerFechaActual() });
+
+        if (response.success) {
+          // alert("Pago confirmado correctamente.");
+          showCustomModal('Éxito', 'Pago confirmado correctamente.', 'success', () => {
+            location.reload();
+          });
+        } else {
+          showCustomModal('Error', 'No se pudo confirmar el pago.', 'error');
+        }
+      });
+    });
+
+    // 🔹 Si elige "No", calcular comisión directamente
+    document.querySelectorAll(".rechazarCFDIComplemento").forEach(btn => {
+      btn.addEventListener("click", async function () {
+        const folio = this.dataset.folio;
+        // alert("No se ingresará CFDI Complemento. Calculando comisiones...");
+        showCustomModal('Información', 'No se ingresará CFDI Complemento. \nCalculando comisiones...', 'info', async () => {
+          await actualizarSeguro(folio, { calcular_comision: true });
+          location.reload();
+        });
+      });
+    });
+
+    // 🔹 Si elige "Sí", mostrar campo de CFDI Complemento
+    document.querySelectorAll(".confirmarCFDIComplemento").forEach(btn => {
+      btn.addEventListener("click", function () {
+        const folio = this.dataset.folio;
+        const tarjeta = document.querySelector(`.folio-card[data-folio="${folio}"]`);
+        const containerDiv = tarjeta.querySelector('.d-grid'); // Target the button container
+
+        if (!tarjeta.querySelector(".cfdiComplemento")) {
+          // Crear input para CFDI Complemento
+          const inputCFDIComplemento = document.createElement("input");
+          inputCFDIComplemento.type = "text";
+          inputCFDIComplemento.classList.add("form-control", "mt-2", "cfdiComplemento");
+          inputCFDIComplemento.dataset.folio = folio;
+          inputCFDIComplemento.placeholder = "Ingrese CFDI Complemento";
+
+          // Botón para guardar el CFDI Complemento
+          const btnGuardarCFDIComplemento = document.createElement("button");
+          btnGuardarCFDIComplemento.classList.add("btn", "btn-primary", "btn-sm", "mt-2", "guardarCFDIComplemento");
+          btnGuardarCFDIComplemento.dataset.folio = folio;
+          btnGuardarCFDIComplemento.textContent = "Guardar CFDI Complemento";
+
+          // Append to the button container instead of the card root
+          containerDiv.appendChild(inputCFDIComplemento);
+          containerDiv.appendChild(btnGuardarCFDIComplemento);
+
+          // Evento para guardar CFDI Complemento
+          btnGuardarCFDIComplemento.addEventListener("click", async function () {
+            const cfdiComplemento = inputCFDIComplemento.value;
+            if (cfdiComplemento) {
+              const response = await actualizarSeguro(folio, { cfdi_complemento: cfdiComplemento });
+
+              if (response.success) {
+                // alert("CFDI Complemento guardado correctamente como: " + cfdiComplemento);
+                showCustomModal('Éxito', `CFDI Complemento guardado correctamente como: ${cfdiComplemento}`, 'success', async () => {
+                  await actualizarSeguro(folio, { calcular_comision: true });
+                  location.reload();
+                });
+              } else {
+                showCustomModal('Error', 'No se pudo guardar el CFDI Complemento.', 'error');
+              }
+            } else {
+              // alert("Debe ingresar un CFDI Complemento antes de continuar.");
+              showCustomModal('Advertencia', 'Debe ingresar un CFDI Complemento antes de continuar.', 'warning');
+            }
+          });
+        }
+      });
+    });
+
+    async function actualizarSeguro(folio, datos) {
+      try {
+        const response = await fetch(`/Seguros/Actualizar/${folio}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(datos),
+        });
+        if (!response.ok) {
+          // Handle HTTP errors like 404, 500
+          console.error("Server responded with status:", response.status);
+          showCustomModal('Error', `Error del servidor: ${response.statusText || response.status}`, 'error');
+          return { success: false };
+        }
+        return await response.json();
+      } catch (error) {
+        console.error("Error al enviar la solicitud:", error);
+        showCustomModal('Error', 'Error de conexión al intentar actualizar.', 'error');
+        return { success: false };
+      }
+    }
+
+    function obtenerFechaActual() {
+      return new Date().toISOString().split("T")[0];
+    }
+
+
+    function showPage(page) {
+      let start = (page - 1) * itemsPerPage;
+      let end = start + itemsPerPage;
+
+      folios.forEach((folio, index) => {
+        folio.style.display = "none"; // Ocultar todos
+      });
+
+      filteredFolios.slice(start, end).forEach(folio => {
+        folio.style.display = "block"; // Mostrar los de la página actual
+      });
+
+      paginationInfo.textContent = `Página ${page} de ${Math.ceil(filteredFolios.length / itemsPerPage)}`;
+      prevPageBtn.disabled = page === 1;
+      nextPageBtn.disabled = page >= Math.ceil(filteredFolios.length / itemsPerPage);
+    }
+
+    searchInput.addEventListener("input", function () {
+      let query = searchInput.value.toLowerCase();
+      filteredFolios = allFolios.filter(folio => {
+        return folio.textContent.toLowerCase().includes(query);
+      });
+
+      currentPage = 1;
+      showPage(currentPage);
+    });
+
+    prevPageBtn.addEventListener("click", function () {
+      if (currentPage > 1) {
+        currentPage--;
+        showPage(currentPage);
+      }
+    });
+
+    nextPageBtn.addEventListener("click", function () {
+      if (currentPage < Math.ceil(filteredFolios.length / itemsPerPage)) {
+        currentPage++;
+        showPage(currentPage);
+      }
+    });
+
+    showPage(currentPage);
+  });
+</script>

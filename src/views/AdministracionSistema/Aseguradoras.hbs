@@ -1,0 +1,51 @@
+<div class="container mt-5">
+  <!-- TÍTULO -->
+  <h2 class="text-center mb-4">Aseguradoras</h2>
+
+  <!-- Botón de regreso -->
+  <div class="d-flex justify-content-center mb-4">
+    <a class="btn btn-consultas btn-lg w-50" href="/AdministracionSistema/Principal">
+      Regresar
+    </a>
+  </div>
+
+  <div class="d-flex justify-content-center mb-4">
+    <a class="btn btn-crear btn-lg w-50" href="../AdministracionSistema/CrearAseguradora">
+      Agregar Aseguradora
+    </a>
+  </div>
+
+
+
+  <!-- Contenedor principal -->
+  <div class="row mt-5 justify-content-center">
+
+    {{#if datos}}
+        <div id="MedicosContainer" class="grid grid-2" style="width: 80%;">
+            {{#each datos}}
+                <div class="card shadow-lg p-3 mb-3 folio-card">
+                   <h4 class="mb-2"><strong>Aseguradora:</strong> {{this.id_seguro}}</h4>
+                   <p class="mb-1"><strong>Dias de plazo:</strong> {{this.dias_plazo}}</p>
+                     <div class="d-grid gap-2">
+                          <a href="../AdministracionSistema/EditarAseguradoras/{{this.id_seguro}}" class="btn btn-cobros btn-sm">Editar</a>
+                          {{#if (eq this.habilitado "si")}}
+                          <a href="../AdministracionSistema/cambiarEdoAse/{{this.id_seguro}}" class="btn btn-danger btn-sm">Inhabilitar</a>
+                          {{else}}
+                          <a href="../AdministracionSistema/cambiarEdoAse/{{this.id_seguro}}" class="btn btn-success btn-sm">Habilitar</a>
+                        {{/if}}
+                      </div>
+                </div>
+                
+            {{/each}}
+        </div>
+    {{else}}
+     <div class="card mx-auto" style="max-width: 300px;">
+         <div class="card-header text-center"><h3 class="m-0">Crea una aseguradora</h3></div>
+             <div class="card-body text-center">
+                  <a href="" class="btn btn-success btn-lg w-100">Crear Aseguradora</a>
+             </div>
+     </div>
+    {{/if}}
+
+  </div>
+</div>

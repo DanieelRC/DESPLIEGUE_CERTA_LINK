@@ -1,0 +1,104 @@
+<div class="container mt-5 d-flex justify-content-center">
+  <div class="card shadow-lg p-4" style="max-width: 400px; width: 100%;">
+    <!-- Título -->
+    <h2 class="text-center mb-3" style="color: var(--primary-blue); font-size: 1.2rem;">
+      Subir archivo para el folio {{id}}
+    </h2>
+
+    <!-- Formulario -->
+    <form method="post" action="../Ingresa/{{id}}" enctype="multipart/form-data" id="uploadForm">
+      <!-- Área de drag and drop -->
+      <div id="drop-area" class="drop-area mb-3 border border-primary rounded text-center p-4" style="cursor: pointer;">
+        <p class="mb-0">Arrastra y suelta tu PDF aquí o haz clic para seleccionar.</p>
+        <!-- Campo para subir archivo (oculto) -->
+        <input type="file" id="fileInput" name="fileInput" class="d-none" accept="application/pdf" required />
+      </div>
+
+      <!-- Botón para subir archivo -->
+      <div class="mt-3">
+        <button type="submit" class="btn btn-pagos w-100">
+          Subir archivo
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<style>
+  /* Estilos para indicar que se ha seleccionado un archivo */
+  .drop-area.file-selected {
+    border-color: #28a745;
+    background-color: #e6ffed;
+  }
+
+  .drop-area.file-selected p {
+    font-weight: bold;
+    color: #28a745;
+  }
+</style>
+
+<script>
+  // Referencias a elementos
+  const dropArea = document.getElementById("drop-area");
+  const fileInput = document.getElementById("fileInput");
+
+  // Mensaje por defecto
+  const defaultText = "Arrastra y suelta tu PDF aquí o haz clic para seleccionar.";
+
+  // Función para actualizar visualmente el dropArea
+  function updateDropArea() {
+    if (fileInput.files && fileInput.files[0]) {
+      dropArea.classList.add('file-selected');
+      dropArea.querySelector("p").textContent = fileInput.files[0].name;
+    } else {
+      dropArea.classList.remove('file-selected');
+      dropArea.querySelector("p").textContent = defaultText;
+    }
+  }
+
+  // Prevenir comportamiento por defecto en drag & drop
+  ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+    dropArea.addEventListener(eventName, function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }, false);
+  });
+
+  // Agregar clase visual durante dragover
+  ['dragenter', 'dragover'].forEach(eventName => {
+    dropArea.addEventListener(eventName, function () {
+      dropArea.classList.add('bg-light');
+    }, false);
+  });
+
+  // Remover clase al salir del área de drop
+  ['dragleave', 'drop'].forEach(eventName => {
+    dropArea.addEventListener(eventName, function () {
+      dropArea.classList.remove('bg-light');
+    }, false);
+  });
+
+  // Manejar el evento drop
+  dropArea.addEventListener("drop", function (e) {
+    const files = e.dataTransfer.files;
+    if (files && files[0]) {
+      // Solo permitir archivos PDF
+      if (files[0].type === "application/pdf") {
+        fileInput.files = files;
+      } else {
+        alert("Solo se permiten archivos PDF.");
+      }
+      updateDropArea();
+    }
+  });
+
+  // Hacer clic en el área para abrir el selector de archivos
+  dropArea.addEventListener("click", function () {
+    fileInput.click();
+  });
+
+  // Actualizar área cuando se selecciona un archivo desde el selector
+  fileInput.addEventListener("change", function () {
+    updateDropArea();
+  });
+</script>

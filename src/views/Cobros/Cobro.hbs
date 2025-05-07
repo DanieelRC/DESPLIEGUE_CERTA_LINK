@@ -1,0 +1,166 @@
+<body>
+
+  <div class="container mt-5 d-flex justify-content-center">
+    <div class="card shadow-lg p-4" style="max-width: 400px; width: 100%;">
+      <form id="formulario" method="post" action="../Cobro/{{folio.folio}}">
+        <h2 class="text-center mb-3" style="color: var(--primary-blue); font-size: 1.2rem;">
+          Cobro de pacientes
+        </h2>
+
+        <!-- Monto a abonar -->
+        <div class="form-group mb-3">
+          <label for="Abono">Ingrese el monto a abonar:</label>
+          <input class="form-control" type="number" name="Abono" step="0.01" id="Abono" placeholder="Ejemplo: 100.00"
+            required />
+        </div>
+
+        <!-- Tipo de pago -->
+        <div class="form-group mb-3">
+          <label for="Id_Pago">Tipo de Pago:</label>
+          <select id="Id_Pago" name="Id_Pago" class="form-control">
+            {{#each pago}}
+            <option value="{{id_metodo}}">
+              {{id_metodo}}
+            </option>
+            {{/each}}
+          </select>
+        </div>
+
+        <!-- Input oculto CobrarComision -->
+        <input type="hidden" id="CobrarComision" name="CobrarComision" value="0" />
+
+        <!-- Alerta -->
+        <div id="alerta" class="mt-2"></div>
+
+        <!-- Botón Enviar -->
+        <div class="mt-3">
+          <button type="submit" class="btn btn-pagos w-100">
+            Crear
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal de confirmación -->
+  <div class="modal fade" id="modalConfirmacion" tabindex="-1" aria-labelledby="modalConfirmacionLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content shadow-lg">
+        <div class="modal-header" style="background-color: var(--primary-blue); color: var(--white);">
+          <h5 class="modal-title" id="modalConfirmacionLabel">Confirmación</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          El monto ingresado supera el monto total. ¿Deseas continuar con el excedente?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-principal" data-bs-dismiss="modal">
+            Cancelar
+          </button>
+          <button type="button" class="btn btn-pagos" id="confirmarExcedente">
+            Confirmar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="modalConfirmacion2" tabindex="-1" aria-labelledby="modalConfirmacionLabel2"
+    aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content shadow-lg">
+        <div class="modal-header" style="background-color: var(--primary-blue); color: var(--white);">
+          <h5 class="modal-title" id="modalConfirmacionLabel2">Confirmación</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          ¿Deseas abonar esta cantidad?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-principal" data-bs-dismiss="modal">
+            Cancelar
+          </button>
+          <button type="button" class="btn btn-pagos" id="Confirmar">
+            Confirmar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de error -->
+  <div class="modal fade" id="modalPeligro" tabindex="-1" aria-labelledby="modalPeligroLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content shadow-lg">
+        <div class="modal-header" style="background-color: var(--red); color: #fff;">
+          <h5 class="modal-title" id="modalPeligroLabel">Error</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          El excedente está fuera del rango permitido (1-7% del monto total). No es posible realizar esta operación.
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-danger-custom" data-bs-dismiss="modal">
+            Cerrar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript para la lógica del formulario -->
+  <script>
+    document.getElementById("formulario").addEventListener("submit", function (event) {
+      const abonoInput = document.getElementById("Abono");
+      const abono = parseFloat(abonoInput.value);
+      const montoTotal = parseFloat({{ folio.monto_total }});
+      const debeTodavia = parseFloat({{ debe_todavia }});
+      const excedente = abono - debeTodavia;
+      const rangoMinimo = montoTotal * 0.01;
+      const rangoMaximo = montoTotal * 0.07;
+      const cobrarComisionInput = document.getElementById("CobrarComision");
+
+      // Limpiar alerta previa
+      const alertaDiv = document.getElementById("alerta");
+      alertaDiv.innerHTML = "";
+
+      // Caso 1: No hay excedente
+      if (abono <= debeTodavia) {
+        event.preventDefault();
+        const Conf = new bootstrap.Modal(document.getElementById("modalConfirmacion2"));
+        Conf.show();
+        document.getElementById("Confirmar").onclick = function () {
+          Conf.hide();
+          document.getElementById("formulario").submit();
+        };
+        cobrarComisionInput.value = "0";
+        return;
+      }
+
+      // Caso 2: Hay excedente
+      event.preventDefault(); // Prevenimos envío inicial
+
+      if (excedente >= rangoMinimo && excedente <= rangoMaximo) {
+        // Mostrar modal de confirmación
+        const modalConfirmacion = new bootstrap.Modal(document.getElementById("modalConfirmacion"));
+        modalConfirmacion.show();
+
+        // Escuchar confirmación
+        document.getElementById("confirmarExcedente").onclick = function () {
+          cobrarComisionInput.value = "1"; // Excedente permitido
+          modalConfirmacion.hide();
+          document.getElementById("formulario").submit();
+        };
+      } else {
+        // Excedente fuera de rango
+        const modalPeligro = new bootstrap.Modal(document.getElementById("modalPeligro"));
+        modalPeligro.show();
+      }
+    });
+  </script>
+
+  <!-- Bootstrap JS (versión 5.x) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>

@@ -1,0 +1,88 @@
+<!-- INICIO DEL CÓDIGO ADAPTADO AL NUEVO CSS -->
+<div class="container mt-5">
+    <!-- Botón "Regresar" -->
+
+
+    <div class="row mt-5 justify-content-center">
+        <div class="card shadow-lg p-4 admin-card-width">
+            <!-- Cabecera usando .card-header-custom para color primario -->
+            <div class="card-header text-center mb-3">
+                <h3 class="m-0">Detalles del Pago</h3>
+            </div>
+
+            <!-- Cuerpo de la tarjeta -->
+            <div class="card-body">
+                <!-- FOLIO -->
+                <div class="form-group mb-3">
+                    <label for="folio">Folio:</label>
+                    <input type="text" id="folio" class="form-control" value="{{folio}}" readonly />
+                </div>
+
+                <!-- MONTO TOTAL -->
+                <div class="form-group mb-3">
+                    <label for="monto_total">Monto Total:</label>
+                    <input type="number" id="monto_total" class="form-control" value="{{monto_total}}" readonly />
+                </div>
+                <!-- MONTO TOTAL -->
+                <div class="form-group mb-3">
+                    <label for="cantidad_transferir">Cantidad a transferir:</label>
+                    <input type="number" id="cantidad_transferir" class="form-control" value="{{cantidad_transferir}}" readonly />
+                </div>
+
+
+                <!-- COMISIÓN CAJA E IVA -->
+                <div class="form-group mb-3">
+                    <label for="comision_caja">Comisión Caja:</label>
+                    <input type="number" id="comision_caja" class="form-control" value="{{comision_caja}}" readonly />
+                </div>
+                <div class="form-group mb-3">
+                    <label for="iva_comision_caja">IVA Comisión Caja:</label>
+                    <input type="number" id="iva_comision_caja" class="form-control" value="{{iva_comision_caja}}"
+                        readonly />
+                </div>
+
+                <!-- COMISION MÉTODO DE PAGO (REAL Y FIJO) -->
+                <div class="row g-3 mb-3">
+                    <div class="col">
+                        <label for="comision_metodo_real">
+                            Comisión Método de Pago Real:
+                        </label>
+                        <input type="number" id="comision_metodo_real" class="form-control"
+                            value="{{comision_metodo_real}}" readonly />
+                    </div>
+                    <div class="col">
+                        <label for="comision_metodo_fijo">
+                            Comisión Método de Pago Fijo:
+                        </label>
+                        <input type="number" id="comision_metodo_fijo" class="form-control"
+                            value="{{comision_metodo_fijo}}" readonly />
+                    </div>
+                </div>
+
+                <!-- IVA COMISIÓN MÉTODO DE PAGO (REAL Y FIJO) -->
+                <div class="row g-3 mb-3">
+                    <div class="col">
+                        <label for="iva_comision_metodo_real">
+                            IVA Comisión Método de Pago Real:
+                        </label>
+                        <input type="number" id="iva_comision_metodo_real" class="form-control"
+                            value="{{iva_comision_metodo_real}}" readonly />
+                    </div>
+                    <div class="col">
+                        <label for="iva_comision_metodo_fijo">
+                            IVA Comisión Método de Pago Fijo:
+                        </label>
+                        <input type="number" id="iva_comision_metodo_fijo" class="form-control"
+                            value="{{iva_comision_metodo_fijo}}" readonly />
+                    </div>
+                </div>
+
+                <!-- RETENCIÓN TOTAL -->
+                <div class="form-group mb-3">
+                    <label for="retencion">Retención Total:</label>
+                    <input type="number" id="retencion" class="form-control" value="{{retencion}}" readonly />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

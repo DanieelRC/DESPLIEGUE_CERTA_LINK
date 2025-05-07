@@ -1,0 +1,139 @@
+<div class="container mt-5">
+  <!-- TÍTULO -->
+  <h2 class="text-center mb-4">Cobro de comisión por folio</h2>
+
+  <!-- Barra de búsqueda -->
+  <div class="mb-4 text-center">
+    <input type="text" id="searchInput" class="form-control w-50 mx-auto"
+      placeholder="Buscar folio, paciente o médico...">
+  </div>
+
+  <!-- Botón "Regresar" -->
+  <div class="d-flex justify-content-center mb-4">
+    <a href="/Cobros/Principal" class="btn btn-danger w-50">Regresar</a>
+  </div>
+
+  <!-- Contenedor principal -->
+  <div class="row mt-5 justify-content-center">
+    {{#if datos}}
+    <div id="foliosContainer" class="grid grid-2" style="width: 80%;">
+      {{#each datos}}
+      <div class="card shadow-lg p-3 mb-3 folio-card" data-folio="{{this.Folio}}">
+        <h4 class="mb-2"><strong>Folio:</strong> {{this.Folio}}</h4>
+        <p class="mb-1"><strong>Habitación:</strong> {{this.Habitacion}}</p>
+        <p class="mb-1"><strong>Fecha:</strong> {{this.Fecha}}</p>
+        <p class="mb-1"><strong>Paciente:</strong> {{this.Paciente}}</p>
+        <p class="mb-1">
+          <strong>Médico:</strong> {{this.Medico_Nombre}} {{this.Medico_Apellido_P}} {{this.Medico_Apellido_M}}
+        </p>
+        <p class="mb-1"><strong>Total a cobrar:</strong> {{formatearMoneda this.Total}}</p>
+        <p class="mb-2"><strong>Restante:</strong> {{formatearMoneda this.debe_todavia}}</p>
+
+        <!-- Botones de acción -->
+        <div class="d-grid gap-2">
+          {{#if (and (eq this.Estatus "No pagado") (eq this.comi_pa "0"))}}
+          <a href="../Cobros/ComisionCobro/{{this.Folio}}/{{this.Total}}" class="btn btn-cobros btn-sm">Abonar</a>
+          {{else}}
+          <span class="text-muted text-center">No se puede abonar más</span>
+          {{/if}}
+          <a href="../Cobros/Detalles/{{this.Folio}}/medico" class="btn btn-outline-secondary-custom btn-sm">Detalles de
+            los cobros</a>
+        </div>
+      </div>
+      {{/each}}
+    </div>
+
+    <!-- Paginación -->
+    <div class="mt-4 d-flex justify-content-center align-items-center gap-3">
+      <button id="prevPage" class="btn btn-outline-secondary-custom" disabled>&#8592; Anterior</button>
+      <span id="paginationInfo">Página 1 de X</span>
+      <button id="nextPage" class="btn btn-outline-secondary-custom">&rarr; Siguiente</button>
+    </div>
+
+    {{else}}
+    <!-- Si no hay datos, mostramos tarjeta indicando que no hay comisiones -->
+    <div class="card mx-auto" style="max-width: 300px;">
+      <div class="card-header text-center">
+        <h3 class="m-0">No hay comisiones por cobrar</h3>
+      </div>
+    </div>
+    {{/if}}
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const searchInput = document.getElementById("searchInput");
+    const foliosContainer = document.getElementById("foliosContainer");
+    const folios = Array.from(document.querySelectorAll(".folio-card"));
+    const paginationInfo = document.getElementById("paginationInfo");
+    const prevPageBtn = document.getElementById("prevPage");
+    const nextPageBtn = document.getElementById("nextPage");
+
+    // Debug information - check what data was received
+    console.log("Total folios received:", folios.length);
+    if (folios.length > 0) {
+      console.log("Sample folio data:", {
+        folio: folios[0].querySelector("h4").textContent,
+        totalACobrar: folios[0].querySelector("p:nth-of-type(5)").textContent,
+        restante: folios[0].querySelector("p:nth-of-type(6)").textContent
+      });
+    }
+
+    let currentPage = 1;
+    let itemsPerPage = 4;
+    let allFolios = [...folios];
+    let filteredFolios = [...folios];
+
+    function showPage(page) {
+      let start = (page - 1) * itemsPerPage;
+      let end = start + itemsPerPage;
+
+      folios.forEach((folio) => {
+        folio.style.display = "none"; // Ocultar todos
+      });
+
+      filteredFolios.slice(start, end).forEach(folio => {
+        folio.style.display = "block"; // Mostrar solo los de la página actual
+      });
+
+      // Update pagination info and button states
+      const totalPages = Math.max(1, Math.ceil(filteredFolios.length / itemsPerPage));
+      paginationInfo.textContent = `Página ${page} de ${totalPages}`;
+      prevPageBtn.disabled = page === 1;
+      nextPageBtn.disabled = page >= totalPages;
+
+      // Debug pagination
+      console.log(`Showing page ${page} of ${totalPages}, displaying items ${start + 1}-${Math.min(end, filteredFolios.length)} of ${filteredFolios.length}`);
+    }
+
+    searchInput.addEventListener("input", function () {
+      let query = searchInput.value.toLowerCase();
+      filteredFolios = allFolios.filter(folio => {
+        return folio.textContent.toLowerCase().includes(query);
+      });
+
+      // Debug search results
+      console.log(`Search for "${query}" returned ${filteredFolios.length} results`);
+
+      currentPage = 1;
+      showPage(currentPage);
+    });
+
+    prevPageBtn.addEventListener("click", function () {
+      if (currentPage > 1) {
+        currentPage--;
+        showPage(currentPage);
+      }
+    });
+
+    nextPageBtn.addEventListener("click", function () {
+      if (currentPage < Math.ceil(filteredFolios.length / itemsPerPage)) {
+        currentPage++;
+        showPage(currentPage);
+      }
+    });
+
+    showPage(currentPage);
+  });
+</script>

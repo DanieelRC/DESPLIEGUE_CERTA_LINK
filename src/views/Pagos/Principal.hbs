@@ -1,0 +1,123 @@
+<div class="container mt-5">
+
+
+  <!-- TÍTULO -->
+  <h2 class="text-center mb-4">Gestión de Pagos</h2>
+
+  <!-- Botón de regreso -->
+  <div class="d-flex justify-content-center mb-4">
+    <a class="btn btn-primary btn-lg w-50" href="/AdministracionFolios">
+        Regresar
+    </a>
+  </div>
+
+  <!-- Barra de búsqueda -->
+  <div class="mb-4 text-center">
+    <input type="text" id="searchInput" class="form-control w-50 mx-auto" placeholder="Buscar folio, paciente o estado del folio...">
+  </div>
+
+  <!-- Contenedor principal -->
+  <div class="row mt-5 justify-content-center">
+    {{#if folios.length}}
+    <div id="foliosContainer" class="grid grid-2" style="width: 80%;">
+      {{#each folios}}
+      <div class="card shadow-lg p-3 mb-3 folio-card" 
+           data-folio="{{this.folio}}" 
+           data-habitacion="{{this.habitacion}}"
+           data-fecha="{{this.fecha}}"
+           data-paciente="{{this.paciente}}"
+           data-tipo-folio="{{this.tipo_folio}}"
+           data-estado-folio="{{this.estado_folio}}"
+           data-monto-total="{{this.monto_total}}">
+        <h4 class="mb-2"><strong>Folio:</strong> {{this.folio}}</h4>
+        <p class="mb-1"><strong>Habitación:</strong> {{this.habitacion}}</p>
+        <p class="mb-1"><strong>Fecha:</strong> {{this.fecha}}</p>
+        <p class="mb-1"><strong>Paciente:</strong> {{this.paciente}}</p>
+        <p class="mb-1"><strong>Tipo de Folio:</strong> {{this.tipo_folio}}</p>
+        <p class="mb-1"><strong>Estado del Folio:</strong> {{this.estado_folio}}</p>
+        <p class="mb-2"><strong>Monto Total:</strong> {{formatearMoneda this.monto_total}}</p>
+
+        <!-- Botón de acción -->
+        <div class="d-grid gap-2">
+          <a href="/Pagos/Pagar/?folio={{this.folio}}&monto_total={{this.monto_total}}"
+             class="btn btn-outline-secondary-custom btn-sm">
+            Pagar
+          </a>
+        </div>
+      </div>
+      {{/each}}
+    </div>
+
+    <!-- Paginación -->
+    <div class="mt-4 d-flex justify-content-center align-items-center gap-3">
+      <button id="prevPage" class="btn btn-outline-secondary-custom" disabled>&#8592; Anterior</button>
+      <span id="paginationInfo">Página 1 de X</span>
+      <button id="nextPage" class="btn btn-outline-secondary-custom">&rarr; Siguiente</button>
+    </div>
+
+    {{else}}
+    <div class="card mx-auto" style="max-width: 300px;">
+      <div class="card-header text-center"><h3 class="m-0">No hay folios pendientes de pago</h3></div>
+    </div>
+    {{/if}}
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const searchInput = document.getElementById("searchInput");
+    const foliosContainer = document.getElementById("foliosContainer");
+    const folios = Array.from(document.querySelectorAll(".folio-card"));
+    const paginationInfo = document.getElementById("paginationInfo");
+    const prevPageBtn = document.getElementById("prevPage");
+    const nextPageBtn = document.getElementById("nextPage");
+
+    let currentPage = 1;
+    let itemsPerPage = 4;
+    let allFolios = [...folios];
+    let filteredFolios = [...folios];
+
+    function showPage(page) {
+      let start = (page - 1) * itemsPerPage;
+      let end = start + itemsPerPage;
+
+      folios.forEach((folio, index) => {
+        folio.style.display = "none"; // Ocultar todos
+      });
+
+      filteredFolios.slice(start, end).forEach(folio => {
+        folio.style.display = "block"; // Mostrar los de la página actual
+      });
+
+      paginationInfo.textContent = `Página ${page} de ${Math.ceil(filteredFolios.length / itemsPerPage)}`;
+      prevPageBtn.disabled = page === 1;
+      nextPageBtn.disabled = page >= Math.ceil(filteredFolios.length / itemsPerPage);
+    }
+
+    searchInput.addEventListener("input", function () {
+      let query = searchInput.value.toLowerCase();
+      filteredFolios = allFolios.filter(folio => {
+        return folio.textContent.toLowerCase().includes(query);
+      });
+
+      currentPage = 1;
+      showPage(currentPage);
+    });
+
+    prevPageBtn.addEventListener("click", function () {
+      if (currentPage > 1) {
+        currentPage--;
+        showPage(currentPage);
+      }
+    });
+
+    nextPageBtn.addEventListener("click", function () {
+      if (currentPage < Math.ceil(filteredFolios.length / itemsPerPage)) {
+        currentPage++;
+        showPage(currentPage);
+      }
+    });
+
+    showPage(currentPage);
+  });
+</script>

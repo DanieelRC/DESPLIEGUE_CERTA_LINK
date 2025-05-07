@@ -1,0 +1,39 @@
+<!-- INICIO DEL CÓDIGO ADAPTADO AL NUEVO CSS -->
+<div class="container mt-5 d-flex justify-content-center">
+    <!-- Reemplazamos "w-50" de Bootstrap por una clase personalizada, p. ej. admin-card-width -->
+    <div class="card shadow-lg admin-card-width">
+        <!-- Usamos .card-header-custom para el color primario -->
+        <div class="card-header text-center">
+            <h3 class="m-0">Cobro de comisión por desborde</h3>
+        </div>
+        <div class="card-body">
+            <form method="post" action="/Cobros/Desborde">
+                <!-- Primer campo: elegir médico -->
+                <div class="form-group mb-3">
+                    <label for="medico">Elija un médico:</label>
+                    <select class="form-control" name="medico" id="medico" required>
+                        {{#each medicos}}
+                        <option value="{{this.correo}}">
+                            {{this.nombre}} {{this.apellido_p}} {{this.apellido_m}}
+                        </option>
+                        {{/each}}
+                    </select>
+                </div>
+
+                <!-- Segundo campo: monto a cobrar -->
+                <div class="form-group mb-3">
+                    <label for="monto">Monto a cobrar:</label>
+                    <input type="number" class="form-control" name="monto" id="monto" placeholder="Ingresa el monto"
+                        required />
+                </div>
+
+                <!-- Botón de envío, usando una clase personalizada (ej. .btn-cobros) -->
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-cobros btn-lg">
+                        Cobrar por desborde
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

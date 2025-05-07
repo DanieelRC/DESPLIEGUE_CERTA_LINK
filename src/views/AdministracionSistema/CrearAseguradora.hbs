@@ -1,0 +1,61 @@
+<!-- INICIO DEL CÓDIGO ADAPTADO AL NUEVO CSS -->
+<div class="container mt-5 d-flex justify-content-center">
+  <!-- Envolvemos el formulario en una tarjeta con sombra -->
+  <div class="card shadow-lg admin-card-width p-4">
+    <form id="formulario" method="post" action="../AdministracionSistema/CrearAseguradora">
+      <!-- Título -->
+      <h2 class="text-center mb-4" style="color: var(--primary-blue);">
+        Agregar Aseguradora
+      </h2>
+
+      <div class="form-group mb-3">
+        <label for="Seguro">Nombre del seguro</label>
+        <input class="form-control" type="text" name="Seguro" id="Seguro" placeholder="Ingrese el nombre de la aseguradora" 
+          autofocus required />
+      </div>
+
+      <div class="form-group mb-3">
+        <label for="Plazo">Plazo, en dias</label>
+        <input class="form-control" type="number"  name="Plazo" id="Plazo"
+          placeholder="Ingrese el plazo" required />
+      </div>
+
+      <!-- Botón para crear folio -->
+      <div class="mt-4">
+        <button type="submit" class="btn btn-crear w-100">
+          Crear
+        </button>
+      </div>
+
+      <div id="alerta" class="mt-3"></div> <!-- Alerta corregida -->
+    </form>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    document.getElementById("formulario").addEventListener("submit", function(event) {
+        // Esta línea genera el array de aseguradoras desde Handlebars
+        const segurosExistentes = [
+            {{#each datos}}
+              "{{this.id_seguro}}"{{#unless @last}},{{/unless}}
+            {{/each}}
+        ].map(seguro => seguro.toLowerCase());
+
+        const metodo = document.getElementById("Seguro").value.trim().toLowerCase();
+
+        if (segurosExistentes.includes(metodo)) {
+            document.getElementById("alerta").innerHTML = `
+                <div class="alert alert-danger">
+                    El método ya está registrado, ingrese otro.
+                </div>
+            `;
+            event.preventDefault(); // Detiene el envío
+        }
+    });
+
+    document.getElementById("Seguro").addEventListener("input", () => {
+        document.getElementById("alerta").innerHTML = "";
+    });
+});
+</script>

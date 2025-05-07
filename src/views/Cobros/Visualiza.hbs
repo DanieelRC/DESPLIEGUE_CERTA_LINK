@@ -1,0 +1,73 @@
+<!-- INICIO DEL CÓDIGO ADAPTADO AL NUEVO CSS -->
+<div class="container mt-5">
+  <!-- TÍTULO -->
+  <h2 class="text-center mb-4">Archivos asociados al folio {{this.id}}</h2>
+  <!-- Botón "Regresar" -->
+  <div class="mb-4">
+    <a href="/Cobros/Almacenamiento" class="btn btn-cobros">
+      Regresar
+    </a>
+  </div>
+
+  {{#if datos}}
+  <!-- Mostramos cada archivo como tarjeta en un contenedor grid -->
+  <div class="grid grid-2">
+    {{#each datos}}
+    <div class="card shadow-lg p-3">
+      <p class="mb-2">
+        <strong>Archivo:</strong> {{this.nombre}}
+      </p>
+      <div class="d-grid gap-2 mb-3">
+        <a href="../Descarga/{{this.id}}" class="btn btn-pagos">
+          Descargar
+        </a>
+      </div>
+      <!-- Aquí se agrega el query parameter preview=true -->
+      <div class="pdf-preview" data-pdfurl="/Cobros/Descarga/{{this.id}}?preview=true"
+        style="border:1px solid #ccc; padding:10px;">
+      </div>
+    </div>
+    {{/each}}
+  </div>
+
+  <!-- Ejemplo de paginación -->
+  <div class="mt-4 d-flex justify-content-center align-items-center gap-3">
+    <a href="?page={{prevPage}}" class="btn btn-outline-secondary-custom" {{#unless hasPrev}}disabled{{/unless}}>
+      &#8592; Anterior
+    </a>
+    <span>Página {{page}} de {{totalPages}}</span>
+    <a href="?page={{nextPage}}" class="btn btn-outline-secondary-custom" {{#unless hasNext}}disabled{{/unless}}>
+      Siguiente &#8594;
+    </a>
+  </div>
+  {{else}}
+  <!-- Si no hay datos, mostramos una invitación a ingresar un archivo -->
+  <div class="card text-center mx-auto" style="max-width: 300px;">
+    <div class="card-header">
+      <h3 class="m-0">Ingresa</h3>
+    </div>
+    <div class="card-body">
+      <p>Ingresa un archivo a este folio, {{id}}</p>
+      <a href="../Ingresa/{{id}}" class="btn btn-pagos">
+        Ingresar un archivo
+      </a>
+    </div>
+  </div>
+  {{/if}}
+</div>
+
+<!-- Inclusión de jQuery y PDFslick -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="/js/pdfslick.min.js"></script>
+<script>
+  $(document).ready(function () {
+    $(".pdf-preview").each(function () {
+      const pdfUrl = $(this).data("pdfurl");
+      $(this).pdfSlick({
+        pdf: pdfUrl,
+        scale: 0.8,
+        width: "100%"
+      });
+    });
+  });
+</script>

@@ -1,0 +1,714 @@
+<body>
+    <div class="history-container">
+        <header class="history-header">
+            <h1>Historial de Cambios</h1>
+            <p class="welcome-text">Bienvenido, <span class="user-name">{{nombre}}</span> <span
+                    class="user-role">({{acceso}})</span></p>
+        </header>
+
+        <form method="GET" action="/AdministracionSistema/Historial" id="filterForm" class="filter-form">
+            <!-- Hidden inputs outside the grid -->
+            <input type="hidden" name="tipo" value="UPDATE">
+            <input type="hidden" name="page" id="page-input" value="{{currentPage}}">
+
+            <fieldset>
+                <legend>Filtros</legend>
+                <div class="filter-grid">
+                    <div class="filter-group">
+                        <label for="fecha">Fecha:</label>
+                        <input type="date" name="fecha" id="fecha" value="{{fecha}}" class="form-control"
+                            onchange="submitForm()">
+                    </div>
+                    <div class="filter-group">
+                        <label for="tabla">Tabla Modificada:</label>
+                        <select name="tabla" id="tabla" onchange="submitForm()" class="form-control">
+                            <option value="">Todas las tablas</option>
+                            <!-- Las opciones se generarán dinámicamente con JavaScript -->
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="modificado">Modificado Por:</label>
+                        <input type="text" name="modificado" id="modificado" placeholder="Filtro por usuario"
+                            value="{{modificado}}" class="form-control" oninput="handleModificadoInput(this.value)">
+                    </div>
+                </div>
+            </fieldset>
+        </form>
+
+        <div class="tables-container">
+            <div id="tables-wrapper" class="tables-wrapper">
+                {{!-- Solo UPDATE --}}
+                <div class="table-section update-section" id="updateSection">
+                    <h2>Registros de Actualización <span class="badge update-badge">UPDATE</span></h2>
+                    <div class="table-responsive">
+                        <table class="data-table history-table" id="updateTable">
+                            <thead>
+                                <tr>
+                                    <th>Tipo de registro afectado</th>
+                                    <th>Folio</th>
+                                    <th>Campo Modificado</th>
+                                    <th>Valor Anterior</th>
+                                    <th>Valor Nuevo</th>
+                                    <th>Fecha Modificación</th>
+                                    <th>Modificado Por</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{#if groupedDatos}}
+                                {{#each groupedDatos}}
+                                <tr class="fecha-group">
+                                    <th colspan="7">{{@key}}</th>
+                                </tr>
+                                {{#each this}}
+                                <tr class="data-row">
+                                    <td class="tabla-afectada">{{this.tabla_afectada_display}}</td>
+                                    <td>{{this.id_registro}}</td>
+                                    <td>{{this.campo_modificado_display}}</td>
+                                    <td>{{this.valor_anterior}}</td>
+                                    <td>{{this.valor_nuevo}}</td>
+                                    <td>{{formatDate this.fecha_modificacion}}</td>
+                                    <td class="modificado-por">
+                                        {{#if this.Usuarios}}
+                                        {{this.Usuarios.nombre}} {{this.Usuarios.apellido_p}}
+                                        {{this.Usuarios.apellido_m}}
+                                        {{else}}
+                                        {{this.modificado_por}}
+                                        {{/if}}
+                                    </td>
+                                </tr>
+                                {{/each}}
+                                {{/each}}
+                                {{else}}
+                                <tr>
+                                    <td colspan="7">No hay registros para la fecha seleccionada</td>
+                                </tr>
+                                {{/if}}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pagination controls -->
+        <div class="pagination-container">
+            <ul class="pagination">
+                {{#if hasPrev}}
+                <li class="page-item">
+                    <a class="page-link" href="javascript:void(0)" onclick="changePage({{currentPage}} - 1)">
+                        <i class="fas fa-chevron-left"></i> Anterior
+                    </a>
+                </li>
+                {{else}}
+                <li class="page-item disabled">
+                    <span class="page-link"><i class="fas fa-chevron-left"></i> Anterior</span>
+                </li>
+                {{/if}}
+
+                {{#if (MasGrandeQue startPage 1)}}
+                <li class="page-item">
+                    <a class="page-link" href="javascript:void(0)" onclick="changePage(1)">1</a>
+                </li>
+                {{#if (MasGrandeQue startPage 2)}}
+                <li class="page-item disabled">
+                    <span class="page-link">...</span>
+                </li>
+                {{/if}}
+                {{/if}}
+
+                {{#each pages}}
+                {{#if (and (MasGrandeQue this.number ../startPage) (MasGrandeQue ../endPage this.number))}}
+                <li class="page-item {{#if this.active}}active{{/if}}">
+                    <a class="page-link" href="javascript:void(0)"
+                        onclick="changePage({{this.number}})">{{this.number}}</a>
+                </li>
+                {{/if}}
+                {{/each}}
+
+                {{#if (MasGrandeQue totalPages endPage)}}
+                {{#if (MasGrandeQue totalPages (add endPage 1))}}
+                <li class="page-item disabled">
+                    <span class="page-link">...</span>
+                </li>
+                {{/if}}
+                <li class="page-item">
+                    <a class="page-link" href="javascript:void(0)"
+                        onclick="changePage({{totalPages}})">{{totalPages}}</a>
+                </li>
+                {{/if}}
+
+                {{#if hasNext}}
+                <li class="page-item">
+                    <a class="page-link" href="javascript:void(0)" onclick="changePage({{currentPage}} + 1)">
+                        Siguiente <i class="fas fa-chevron-right"></i>
+                    </a>
+                </li>
+                {{else}}
+                <li class="page-item disabled">
+                    <span class="page-link">Siguiente <i class="fas fa-chevron-right"></i></span>
+                </li>
+                {{/if}}
+            </ul>
+        </div>
+
+        <div class="navigation">
+            <a href="/AdministracionSistema/Principal" class="btn back-btn">
+                <i class="fas fa-arrow-left"></i> Volver al Panel Principal
+            </a>
+        </div>
+    </div>
+
+    <style>
+        /* Estilos generales mejorados */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 0;
+        }
+
+        .history-container {
+            width: 100%;
+            max-width: 1800px;
+            /* Increased from 1200px */
+            margin: 0 auto;
+            padding: 1.5rem;
+            box-sizing: border-box;
+        }
+
+        /* Encabezado mejorado */
+        .history-header {
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #e1e5eb;
+            padding-bottom: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .history-header h1 {
+            color: #1a3b5d;
+            margin-bottom: 0.5rem;
+            font-size: 2.2rem;
+            margin-top: 0;
+        }
+
+        .welcome-text {
+            font-size: 1.1rem;
+            color: #666;
+        }
+
+        .user-name {
+            font-weight: bold;
+            color: #1a3b5d;
+        }
+
+        .user-role {
+            font-style: italic;
+            color: #666;
+        }
+
+        /* Formulario de filtros mejorado */
+        .filter-form {
+            margin-bottom: 2rem;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .filter-form:hover {
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+        }
+
+        .filter-form fieldset {
+            border: none;
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .filter-form legend {
+            font-weight: bold;
+            color: #1a3b5d;
+            padding: 0 10px;
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #4a5568;
+        }
+
+        .form-control {
+            padding: 0.75rem;
+            border: 1px solid #dce0e8;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            background-color: #f9fafc;
+            color: #2d3748;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #90cdf4;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
+            background-color: #fff;
+        }
+
+        /* Estilos mejorados para las tablas */
+        .tables-container {
+            margin-bottom: 2rem;
+        }
+
+        .table-section {
+            margin-bottom: 2rem;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            padding: 1.5rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .table-section:hover {
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+        }
+
+        .table-section h2 {
+            color: #1a3b5d;
+            margin-top: 0;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            font-size: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid rgba(0, 123, 255, 0.2);
+        }
+
+        .badge {
+            font-size: 0.7rem;
+            padding: 0.25rem 0.65rem;
+            border-radius: 50px;
+            margin-left: 0.75rem;
+            color: white;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        .update-badge {
+            background-color: #3182ce;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e0 #f7fafc;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            text-align: left;
+        }
+
+        .data-table th {
+            background-color: #f7fafc;
+            color: #1a3b5d;
+            padding: 1rem;
+            font-weight: 600;
+            border-bottom: 2px solid #edf2f7;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .data-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #edf2f7;
+            transition: background-color 0.15s;
+        }
+
+        /* Estilo para agrupar por fecha */
+        .fecha-group {
+            background-color: #ebf4ff;
+            color: #2c5282;
+            font-weight: bold;
+        }
+
+        .fecha-group th {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            font-size: 1.1rem;
+            border-left: 4px solid #4299e1;
+        }
+
+        .data-table tbody tr.data-row:hover {
+            background-color: rgba(66, 153, 225, 0.05);
+        }
+
+        /* Estilos mejorados para la paginación */
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            margin: 2rem 0;
+        }
+
+        .pagination {
+            display: flex;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            background-color: #fff;
+        }
+
+        .page-item {
+            margin: 0;
+            border-right: 1px solid #edf2f7;
+        }
+
+        .page-item:last-child {
+            border-right: none;
+        }
+
+        .page-link {
+            display: block;
+            padding: 0.75rem 1rem;
+            color: #2d3748;
+            background-color: #fff;
+            text-decoration: none;
+            min-width: 2.5rem;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+
+        .page-link:hover {
+            background-color: #edf2f7;
+            color: #1a3b5d;
+            text-decoration: none;
+        }
+
+        .page-item.active .page-link {
+            background-color: #3182ce;
+            color: white;
+            font-weight: 500;
+        }
+
+        .page-item.disabled .page-link {
+            color: #a0aec0;
+            pointer-events: none;
+            cursor: not-allowed;
+            background-color: #f7fafc;
+        }
+
+        /* Botón mejorado */
+        .navigation {
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        .btn {
+            display: inline-block;
+            font-weight: 600;
+            text-align: center;
+            padding: 0.875rem 1.5rem;
+            font-size: 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+        }
+
+        .back-btn {
+            color: #fff;
+            background-color: #2c5282;
+            border: none;
+            letter-spacing: 0.5px;
+        }
+
+        .back-btn:hover {
+            background-color: #2b6cb0;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+        }
+
+        .back-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Estilos responsivos mejorados */
+        @media (max-width: 768px) {
+            .history-container {
+                padding: 1rem;
+            }
+
+            .filter-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .data-table {
+                display: block;
+                overflow-x: auto;
+            }
+
+            .data-table th,
+            .data-table td {
+                padding: 0.75rem 0.5rem;
+                font-size: 0.9rem;
+                white-space: nowrap;
+            }
+
+            /* Agrega capacidad de scroll horizontal */
+            .table-responsive {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                margin: 0 -1rem;
+                padding: 0 1rem;
+            }
+
+            /* Ocultar algunas columnas menos importantes en móvil */
+            .data-table th:nth-child(4),
+            .data-table td:nth-child(4),
+            .data-table th:nth-child(5),
+            .data-table td:nth-child(5) {
+                display: none;
+            }
+        }
+
+        /* Media query para dispositivos más pequeños */
+        @media (max-width: 480px) {
+            .history-header h1 {
+                font-size: 1.75rem;
+            }
+
+            .table-section {
+                padding: 1rem;
+            }
+
+            .badge {
+                font-size: 0.65rem;
+                padding: 0.2rem 0.5rem;
+            }
+
+            .page-link {
+                padding: 0.5rem 0.75rem;
+                min-width: 2rem;
+            }
+        }
+    </style>
+
+    <!-- Add Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+    <script>
+        // Global variables
+        let currentTableType = "{{filtro}}";
+        const tableTypes = ["CREATE", "UPDATE", "DELETE"];
+
+        // Client-side date formatter (for use in the table)
+        function formatDate(dateString) {
+            if (!dateString) return 'Fecha no disponible';
+
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return dateString; // If invalid date, return original
+
+            // Format to: DD/MM/YYYY HH:MM:SS
+            return date.toLocaleString('es-ES', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+        }
+
+        // Function to handle table type changes with animation
+        function changeTableType(newType) {
+            const oldType = currentTableType;
+            currentTableType = newType;
+
+            // Get the index of both types to determine direction
+            const oldIndex = tableTypes.indexOf(oldType);
+            const newIndex = tableTypes.indexOf(newType);
+
+            // Determine direction (left or right)
+            const direction = oldIndex < newIndex ? "left" : "right";
+
+            // Apply animation
+            animateTableChange(oldType, newType, direction);
+
+            // Update form and submit
+            document.getElementById('page-input').value = 1; // Reset to page 1
+            submitForm();
+        }
+
+        // Animation function
+        function animateTableChange(oldType, newType, direction) {
+            const oldSection = document.getElementById(oldType.toLowerCase() + 'Section');
+            const newSection = document.getElementById(newType.toLowerCase() + 'Section');
+
+            if (!oldSection || !newSection) return;
+
+            // Set initial state
+            oldSection.style.display = 'block';
+            newSection.style.display = 'block';
+
+            // Add animation classes
+            oldSection.classList.add(`slide-${direction}-exit`);
+            newSection.classList.add(`slide-${direction}-enter`);
+
+            // Force reflow to ensure animation starts
+            void oldSection.offsetWidth;
+
+            // Add active classes to trigger animation
+            oldSection.classList.add(`slide-${direction}-exit-active`);
+            newSection.classList.add(`slide-${direction}-enter-active`);
+
+            // Clean up after animation completes
+            setTimeout(() => {
+                oldSection.style.display = 'none';
+                oldSection.classList.remove(`slide-${direction}-exit`, `slide-${direction}-exit-active`);
+                newSection.classList.remove(`slide-${direction}-enter`, `slide-${direction}-enter-active`);
+            }, 800); // Increased from 500ms to 800ms to match CSS transition
+        }
+
+        // Function to handle modificado input filtering
+        let typingTimer;
+        const doneTypingInterval = 300; // Wait time after user stops typing (ms)
+
+        function handleModificadoInput(value) {
+            // Clear previous timer
+            clearTimeout(typingTimer);
+
+            // Set new timer - only process after user stops typing
+            typingTimer = setTimeout(() => {
+                // If input is non-empty and less than 3 characters, wait for more input
+                if (value && value.length < 3) return;
+
+                submitForm();
+            }, doneTypingInterval);
+        }
+
+        // Function to change page and submit form
+        function changePage(page) {
+            document.getElementById('page-input').value = page;
+            submitForm();
+        }
+
+        // Function to submit the form
+        function submitForm() {
+            document.getElementById('filterForm').submit();
+        }
+
+        // Function to populate the table dropdown with unique values
+        function populateTableDropdown() {
+            const tableSelect = document.getElementById('tabla');
+            const tableCells = document.querySelectorAll('.tabla-afectada');
+            const uniqueTables = new Set();
+
+            // Extract unique table names from all rows
+            tableCells.forEach(cell => {
+                const tableName = cell.textContent.trim();
+                if (tableName) {
+                    uniqueTables.add(tableName);
+                }
+            });
+
+            // Sort table names alphabetically
+            const sortedTables = Array.from(uniqueTables).sort();
+
+            // Clear any existing options except the first "Todas las tablas" option
+            while (tableSelect.options.length > 1) {
+                tableSelect.remove(1);
+            }
+
+            // Add options to select dropdown
+            sortedTables.forEach(tableName => {
+                const option = document.createElement('option');
+                option.value = tableName;
+                option.textContent = tableName;
+
+                // If a table value is in the URL, select it
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.get('tabla') === tableName) {
+                    option.selected = true;
+                }
+
+                tableSelect.appendChild(option);
+            });
+
+            // Make sure the value from the URL is properly selected
+            const urlParams = new URLSearchParams(window.location.search);
+            const selectedTable = urlParams.get('tabla');
+            if (selectedTable) {
+                // Try to find the option that matches
+                let found = false;
+                for (let i = 0; i < tableSelect.options.length; i++) {
+                    if (tableSelect.options[i].value === selectedTable) {
+                        tableSelect.selectedIndex = i;
+                        found = true;
+                        break;
+                    }
+                }
+
+                // If not found and value is not empty, add it
+                if (!found && selectedTable.trim() !== '') {
+                    const option = document.createElement('option');
+                    option.value = selectedTable;
+                    option.textContent = selectedTable;
+                    option.selected = true;
+                    tableSelect.appendChild(option);
+                }
+            }
+        }
+
+        // Process all dates in the table on page load
+        function processTableDates() {
+            // Find all date cells and format them
+            document.querySelectorAll('.data-row td:nth-child(6)').forEach(cell => {
+                const dateText = cell.textContent.trim();
+                if (dateText) {
+                    cell.textContent = formatDate(dateText);
+                }
+            });
+        }
+
+        // Initialize page: populate dropdown and apply filters
+        document.addEventListener('DOMContentLoaded', function () {
+            populateTableDropdown();
+            processTableDates();
+
+            // Debug: Log current filter values
+            const urlParams = new URLSearchParams(window.location.search);
+            console.log('Current filters:', {
+                fecha: urlParams.get('fecha'),
+                tabla: urlParams.get('tabla'),
+                modificado: urlParams.get('modificado'),
+                page: urlParams.get('page'),
+                tipo: urlParams.get('tipo')
+            });
+        });
+    </script>
+</body>

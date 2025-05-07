@@ -1,0 +1,111 @@
+<!-- INICIO DEL CÓDIGO ADAPTADO AL NUEVO CSS -->
+<div class="container mt-5">
+  <!-- Botón "Regresar" -->
+  {{#if (eq this.tipo "paciente")}}
+  <div class="mb-3">
+    <!-- Usamos .btn-crear (similar a btn-warning) -->
+    <a class="btn btn-crear" href="/Cobros/Abono">Regresar</a>
+  </div>
+  {{else}}
+  <div class="mb-3">
+    <a class="btn btn-crear" href="/Cobros/Comision">Regresar</a>
+  </div>
+  {{/if}}
+
+  <!-- Título -->
+  <h2 class="mb-4 text-center">
+    Cobros asociados al folio <strong>{{datos.folio}}</strong>
+  </h2>
+
+  {{#if datos}}
+  <!-- Mostramos cada cobro como una tarjeta en un grid -->
+  <div class="grid grid-2 mb-4">
+    {{#each datos}}
+    <div class="card shadow-lg p-3">
+      <p class="mb-1">
+        <strong>Fecha:</strong> {{this.fecha}}
+      </p>
+      <p class="mb-1">
+        <strong>Abono:</strong> {{formatearMoneda this.abono}}
+      </p>
+      <p>
+        <strong>Método de pago:</strong> {{this.id_tipo_pago}}
+      </p>
+    </div>
+    {{/each}}
+  </div>
+
+  <!-- Paginación (ejemplo 20 registros por página, si aplicas) -->
+  <div class="mt-4 d-flex justify-content-center align-items-center gap-3">
+    <a href="?page={{prevPage}}" class="btn btn-outline-secondary-custom" {{#unless hasPrev}}disabled{{/unless}}>
+      &#8592; Anterior
+    </a>
+    <span>
+      Página {{page}} de {{totalPages}}
+    </span>
+    <a href="?page={{nextPage}}" class="btn btn-outline-secondary-custom" {{#unless hasNext}}disabled{{/unless}}>
+      Siguiente &#8594;
+    </a>
+  </div>
+  {{else}}
+  <!-- Sin cobros asociados -->
+  <div class="card shadow-lg p-3 text-center">
+    <h3 class="m-0">No tiene ningún cobro asociado</h3>
+  </div>
+  {{/if}}
+
+  {{!-- Si this.tipo == "paciente", no mostramos más info. De lo contrario, mostramos secciones adicionales. --}}
+  {{#unless (eq this.tipo "paciente")}}
+  <hr class="my-4" />
+  <!-- Info acerca del cobro al médico -->
+  <h2 class="text-center">Información acerca del cobro al médico</h2>
+
+  <!-- Total bruto e IVA deducido en tarjetas -->
+  <div class="grid grid-2 mt-4">
+    <div class="card shadow-lg p-3">
+      <p class="mb-1">
+        <strong>Total bruto:</strong> {{formatearMoneda this.total_bruto}}
+      </p>
+      <p class="m-0">
+        <strong>Iva deducido:</strong> {{formatearMoneda this.iva_desc}}
+      </p>
+    </div>
+  </div>
+
+  <!-- Comisiones, si existen -->
+  <div class="mt-4">
+    {{#if comisiones}}
+    <h3 class="mb-3 text-center">Comisiones</h3>
+    <!-- Mostramos cada comisión como tarjeta en grid -->
+    <div class="grid grid-2">
+      {{#each comisiones}}
+      <div class="card shadow-lg p-3">
+        <p class="mb-1">
+          <strong>Tipo de comisión:</strong> {{this.Nombre}}
+        </p>
+        <p class="mb-1">
+          <strong>Cargo:</strong> {{formatearMoneda this.MetodoPago}}
+        </p>
+        <p class="m-0">
+          <strong>IVA:</strong> {{formatearMoneda this.IVA_MetodoPago}}
+        </p>
+      </div>
+      {{/each}}
+    </div>
+
+    <!-- Paginación para comisiones (si lo manejas aparte) -->
+    <div class="mt-4 d-flex justify-content-center align-items-center gap-3">
+      <a href="?pageC={{prevPageC}}" class="btn btn-outline-secondary-custom" {{#unless hasPrevC}}disabled{{/unless}}>
+        &#8592; Anterior
+      </a>
+      <span>
+        Página {{pageC}} de {{totalPagesC}}
+      </span>
+      <a href="?pageC={{nextPageC}}" class="btn btn-outline-secondary-custom" {{#unless hasNextC}}disabled{{/unless}}>
+        Siguiente &#8594;
+      </a>
+    </div>
+    {{/if}}
+  </div>
+  {{/unless}}
+</div>

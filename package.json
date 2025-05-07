@@ -1,0 +1,40 @@
+{
+  "name": "caja_medicos_vf",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./src/app.js",
+  "scripts": {
+    "start": "node ./src/app.js",
+    "dev": "nodemon ./src/app.js",
+    "test": "node ./test/testConexion.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "dotenv": "^16.4.7",
+    "handlebars": "^4.5.0",
+    "morgan": "^1.10.0",
+    "nodemon": "^3.1.7"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "bootstrap": "^5.3.3",
+    "connect-flash": "^0.1.1",
+    "cookie-parser": "^1.4.7",
+    "express": "^4.21.1",
+    "express-handlebars": "^8.0.1",
+    "express-session": "^1.18.1",
+    "fs-extra": "^11.2.0",
+    "multer": "^1.4.5-lts.1",
+    "mysql2": "^3.11.5",
+    "passport": "^0.7.0",
+    "passport-local": "^1.0.0",
+    "path": "^0.12.7",
+    "pdf-lib": "^1.17.1",
+    "pdfkit": "^0.15.1",
+    "sequelize": "^6.37.5",
+    "url": "^0.11.4",
+    "uuid": "^11.0.3"
+  }
+}

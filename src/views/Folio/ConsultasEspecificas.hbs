@@ -1,0 +1,94 @@
+<!-- INICIO DEL CÓDIGO ADAPTADO AL NUEVO CSS -->
+
+  <!-- Botón "Regresar" -->
+  <div class="row mt-5">
+    {{#if datos}}
+    <div class="d-flex flex-column align-items-center mt-4">
+            <label for="searchInput" class="form-label" style="font-weight: bold; color: var(--primary-blue);">
+                Barra de búsqueda:
+            </label>
+            <input id="searchInput" class="form-control w-50" oninput="filterCards()" style="max-width: 300px;" >
+        </div>
+
+    <hr />
+    <!-- Mostramos cada folio como tarjeta en un contenedor grid -->
+    <div class="grid grid-2" style="width: 75%; margin: 0 auto;">
+        {{#each datos}}
+        <div class="card shadow-lg p-3 folio-card" data-folio="{{this.Folio}}" 
+            data-habitacion="{{this.Habitacion}}"
+            data-fecha="{{this.Fecha}}"
+            data-paciente="{{this.Paciente}}"
+            data-tipo-folio="{{this.tipo_folio}}"
+            data-estado-folio="{{this.Medico_Nombre}} {{this.Medico_Apellido_P}} {{this.Medico_Apellido_M}}"
+            data-monto-total="{{this.Total}}">
+            <p class="mb-1">
+                <strong>Folio:</strong> {{this.Folio}}
+            </p>
+            <p class="mb-1">
+                <strong>Habitación:</strong> {{this.Habitacion}}
+            </p>
+            <p class="mb-1">
+                <strong>Fecha:</strong> {{this.Fecha}}
+            </p>
+            <p class="mb-1">
+                <strong>Paciente:</strong> {{this.Paciente}}
+            </p>
+            <p class="mb-2">
+                <strong>Médico:</strong> {{this.Medico_Nombre}} {{this.Medico_Apellido_P}} {{this.Medico_Apellido_M}}
+            </p>
+
+            <!-- Acciones -->
+            <div class="d-grid gap-2">
+                <a href="../Folio/Consultar/{{this.Folio}}" class="btn btn-pagos btn-sm">
+                    Consultar
+                </a>
+            </div>
+        </div>
+        {{/each}}
+    </div>
+
+    <!-- Paginación -->
+    <div class="mt-4 d-flex justify-content-center align-items-center gap-3">
+        <a href="?page={{prevPage}}" class="btn btn-outline-secondary-custom" {{#unless hasPrev}}disabled{{/unless}}>
+            &#8592; Anterior
+        </a>
+        <span>Página {{page}} de {{totalPages}}</span>
+        <a href="?page={{nextPage}}" class="btn btn-outline-secondary-custom" {{#unless hasNext}}disabled{{/unless}}>
+            Siguiente &#8594;
+        </a>
+    </div>
+    {{else}}
+    <div class="card text-center mx-auto" style="max-width: 300px;">
+        <div class="card-header">
+            <h3 class="m-0">Crea un folio</h3>
+        </div>
+        <div class="card-body">
+            <a href="../Folio/CrearFolio" class="btn btn-crear btn-lg w-100">
+                Crear Folio
+            </a>
+        </div>
+    </div>
+    {{/if}}
+</div>
+
+<script>
+    function filterCards() {
+        var searchInput = document.getElementById("searchInput").value.toLowerCase();
+        var cards = document.getElementsByClassName("folio-card");
+
+        for (var i = 0; i < cards.length; i++) {
+            var card = cards[i];
+            var cardData = card.dataset;
+            var visible = false;
+
+            for (var key in cardData) {
+                if (cardData[key] && cardData[key].toLowerCase().includes(searchInput)) {
+                    visible = true;
+                    break;
+                }
+            }
+
+            card.style.display = visible ? "" : "none";
+        }
+    }
+</script>

@@ -1,0 +1,55 @@
+<div class="container mt-5">
+  <!-- TÍTULO -->
+  <h2 class="text-center mb-4">Medicos registrados</h2>
+
+  <!-- Botón de regreso -->
+  <div class="d-flex justify-content-center mb-4">
+    <a class="btn btn-consultas btn-lg w-50" href="/AdministracionSistema/Principal">
+      Regresar
+    </a>
+  </div>
+
+  <div class="d-flex justify-content-center mb-4">
+    <a class="btn btn-crear btn-lg w-50" href="../AdministracionSistema/CrearMedico">
+      Agregar Medico
+    </a>
+  </div>
+
+
+
+  <!-- Contenedor principal -->
+  <div class="row mt-5 justify-content-center">
+
+    {{#if datos}}
+        <div id="MedicosContainer" class="grid grid-2" style="width: 80%;">
+            {{#each datos}}
+                <div class="card shadow-lg p-3 mb-3 folio-card">
+                   <h4 class="mb-2"><strong>Correo:</strong> {{this.correo}}</h4>
+                   <p class="mb-1"><strong>Nombre:</strong> {{this.nombre}}</p>
+                   <p class="mb-1"><strong>Apellido Paterno:</strong> {{this.apellido_p}}</p>
+                   <p class="mb-1"><strong>Apellido Materno:</strong> {{this.apellido_m}}</p>
+                     <div class="d-grid gap-2">
+                          <a href="../AdministracionSistema/EditarMedico/{{this.correo}}" class="btn btn-cobros btn-sm">Editar</a>
+                        {{#if (eq this.estado "habilitado")}}
+                          <a href="../AdministracionSistema/cambiarEdo/{{this.correo}}" class="btn btn-danger btn-sm">Inhabilitar</a>
+                        {{else}}
+                          <a href="../AdministracionSistema/cambiarEdo/{{this.correo}}" class="btn btn-success btn-sm">Habilitar</a>
+                        {{/if}}
+
+                          
+                      </div>
+                </div>
+                
+            {{/each}}
+        </div>
+    {{else}}
+     <div class="card mx-auto" style="max-width: 300px;">
+         <div class="card-header text-center"><h3 class="m-0">Crea un folio</h3></div>
+             <div class="card-body text-center">
+                  <a href="../Folio/CrearFolio?tipoFolio=Particulares" class="btn btn-success btn-lg w-100">Crear Folio</a>
+             </div>
+     </div>
+    {{/if}}
+
+  </div>
+</div>

@@ -1,0 +1,104 @@
+<!-- INICIO DEL CÓDIGO ADAPTADO AL NUEVO CSS -->
+<div class="container mt-5">
+    <!-- Botón "Regresar" -->
+    <div class="d-flex justify-content-center mb-4">
+        <!-- Sustituimos .btn-danger por .btn-danger-custom -->
+        <a href="/AdministracionFolios" class="btn btn-danger-custom btn-lg">
+            Regresar
+        </a>
+    </div>
+
+    <!-- Sección principal -->
+    <div class="d-flex justify-content-center mt-5">
+        <!-- Usamos una tarjeta con sombras y anchura ajustada -->
+        <div class="card shadow-lg admin-card-width">
+            <!-- Cabecera de la tarjeta con color primario -->
+            <div class="card-header text-center">
+                <h3 class="m-0">Realizar Pago del Folio {{folio}}</h3>
+            </div>
+
+            <div class="card-body">
+                <!-- Campo "Monto a Pagar" -->
+                <div class="form-group mb-3">
+                    <label for="monto">Monto a Pagar:</label>
+                    <input type="number" id="monto" class="form-control" value="{{monto_total}}"
+                        placeholder="Ingrese el monto a pagar" readonly required />
+                </div>
+
+                <!-- Botones de Pago (fila con 3 opciones) -->
+                <div class="d-flex flex-wrap gap-2 mt-3">
+                    <!-- Pago por Retención -->
+                    <a id="pagoRetencion" href="#" class="btn btn-outline-secondary-custom btn-lg flex-fill"
+                        onclick="setHref('PagoRetencion')">
+                        Pago por Retención
+                    </a>
+                    <!-- Pago Completo -->
+                    <a id="pagoCompleto" href="#" class="btn btn-outline-secondary-custom btn-lg flex-fill"
+                        onclick="setHref('PagoCompleto')">
+                        Pago Completo
+                    </a>
+                    <!-- Pago por Comisión Fija -->
+                    <a id="pagoComision" href="#" class="btn btn-outline-secondary-custom btn-lg flex-fill"
+                        onclick="setHref('PagoComision')">
+                        Pago por Comisión Fija
+                    </a>
+                </div>
+
+                <!-- Contenedor para posibles alertas de validación -->
+                <div id="alerta" class="mt-4"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function getFolioFromUrl() {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get('folio');
+    }
+
+    function setHref(type) {
+        const alertaDiv = document.getElementById("alerta");
+        var monto = document.getElementById('monto').value;
+        var comision_paciente = {{ comision_paciente }}; // Obtener valor de la variable desde el backend
+
+        // Validación del monto
+        if (parseFloat(monto) > parseFloat({{ monto_total }})) {
+            alertaDiv.innerHTML = `
+            <div class="alert alert-warning" role="alert">
+                El monto del abono no puede ser mayor que el monto total.
+            </div>`;
+            event.preventDefault();
+            return;
+        }
+
+        // Bloqueo y mensajes de error según comision_paciente
+        if (comision_paciente === true && (type === 'PagoCompleto' || type === 'PagoRetencion')) {
+            alertaDiv.innerHTML = `
+            <div class="alert alert-danger" role="alert">
+                No es posible procesar el pago mediante ${type.replace('Pago', '')} porque la comisión es cobrada al paciente.
+            </div>`;
+            event.preventDefault();
+            return;
+        }
+
+        if (comision_paciente === false && type === 'PagoComision') {
+            alertaDiv.innerHTML = `
+            <div class="alert alert-danger" role="alert">
+                No es posible procesar el pago mediante Comisión porque la comisión no fue cobrada al paciente.
+            </div>`;
+            event.preventDefault();
+            return;
+        }
+
+        var folio = getFolioFromUrl();
+        var url = `/Pagos/${type}/?folio=${folio}&monto=${monto}`;
+
+        if (type === 'PagoRetencion') {
+            document.getElementById('pagoRetencion').href = url;
+        } else if (type === 'PagoCompleto') {
+            document.getElementById('pagoCompleto').href = url;
+        } else if (type === 'PagoComision') {
+            document.getElementById('pagoComision').href = url;
+        }
+    }
+</script>

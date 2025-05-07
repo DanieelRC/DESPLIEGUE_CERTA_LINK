@@ -1,0 +1,22 @@
+<!-- INICIO DEL CÓDIGO ADAPTADO AL NUEVO CSS -->
+<div class="container mt-5">
+    <div class="card shadow-lg">
+        <!-- Reemplazamos "bg-primary text-white" por .card-header-custom -->
+        <div class="card-header text-center">
+            <h3 class="m-0">Detalles del Desborde</h3>
+        </div>
+        <div class="card-body text-center">
+            <p class="lead">{{msg}}</p>
+            <!-- Información en tarjetas y texto centrado -->
+            <div class="d-flex flex-column align-items-center gap-3">
+                <p>
+                    <strong>Monto abonado:</strong> {{monto}}
+                </p>
+            </div>
+            <!-- Botón "Volver a Cobros" usando una clase personalizada de tu CSS -->
+            <a href="./Principal" class="btn btn-cobros btn-lg mt-4">
+                Volver a Cobros
+            </a>
+        </div>
+    </div>
+</div>
