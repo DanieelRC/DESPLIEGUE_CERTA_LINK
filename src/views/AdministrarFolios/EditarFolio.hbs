@@ -10,13 +10,13 @@
 
       <div class="form-group mb-3">
         <label for="Paciente">Paciente</label>
-        <input class="form-control" value = {{datos.paciente}} type="text" name="Paciente" id="Paciente" placeholder="Ingrese el nombre del paciente" 
-          autofocus required />
+        <input class="form-control" value={{datos.paciente}} type="text" name="Paciente" id="Paciente"
+          placeholder="Ingrese el nombre del paciente" autofocus required />
       </div>
-    <!-- Médico -->
+      <!-- Médico -->
       <div class="form-group mb-3">
         <label for="Medico">Médico</label>
-        <select id="Medico" value= {{datos.medico}} name="Medico" class="form-control">
+        <select id="Medico" value={{datos.medico}} name="Medico" class="form-control">
           {{#each Medicos}}
           <option value="{{correo}}">
             {{nombre}} {{apellido_p}} {{apellido_m}}
@@ -27,26 +27,26 @@
 
       <div class="form-group mb-3">
         <label for="Habitacion">Habitación</label>
-        <input class="form-control" value = {{datos.habitacion}} type="text" name="Habitacion" id="Habitacion"
+        <input class="form-control" value={{datos.habitacion}} type="text" name="Habitacion" id="Habitacion"
           placeholder="Ingrese la habitacion" required />
       </div>
 
-    {{#if (eq datos.tipo_folio "Particulares")}}
+      {{#if (eq datos.tipo_folio "Particulares")}}
 
       <div class="form-group mb-3">
         <label for="Habitacion">Monto total</label>
-        <input class="form-control" value = {{datos.monto_total}} type="text" name="Monto" id="Monto"
+        <input class="form-control" value={{datos.monto_total}} type="text" name="Monto" id="Monto"
           placeholder="Ingrese el monto total" required />
       </div>
-      
-    {{/if}}
+
+      {{/if}}
 
       <div class="mt-4">
         <button type="submit" class="btn btn-crear w-100">
-         Editar Folio
+          Editar Folio
         </button>
       </div>
-    
+
 
       <div id="alerta" class="mt-3"></div> <!-- Alerta corregida -->
     </form>

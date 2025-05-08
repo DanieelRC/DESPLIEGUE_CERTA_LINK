@@ -685,3 +685,35 @@ body.login-page {
         bottom: 100%;
     }
 }
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card {
+        width: 100%;
+        margin: 0 auto;
+    }
+
+    .container {
+        padding: 0.5rem;
+    }
+
+    h3 {
+        font-size: 1.5rem;
+    }
+
+    .btn {
+        font-size: 1.2rem;
+        padding: 0.5rem 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    h3 {
+        font-size: 1.2rem;
+    }
+
+    .btn {
+        font-size: 1rem;
+        padding: 0.4rem 0.8rem;
+    }
+}

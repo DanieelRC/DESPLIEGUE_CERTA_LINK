@@ -9,7 +9,7 @@ module.exports = function (passport) {
   router.get("/AdministrarFolios/Principal", isLoggedIn, async (req, res) => {
     res.render("AdministrarFolios/Principal");
   });
-  
+
   router.get("/AdministrarFolios/Seguros", isLoggedIn, async (req, res) => {
     const folios = await Caja.Folio.findAll({
       attributes: [
@@ -54,7 +54,7 @@ module.exports = function (passport) {
     });
   });
 
-  
+
   router.get("/AdministrarFolios/Particulares", isLoggedIn, async (req, res) => {
     const folios = await Caja.Folio.findAll({
       attributes: [
@@ -109,11 +109,11 @@ module.exports = function (passport) {
       })
 
       await Caja.Medico.sync();
-        const med = await Caja.Medico.findAll({
-          where: {
-            estado: "habilitado"
-          }
-        });
+      const med = await Caja.Medico.findAll({
+        where: {
+          estado: "habilitado"
+        }
+      });
 
       res.render("AdministrarFolios/EditarFolio", {
         datos: Folio,

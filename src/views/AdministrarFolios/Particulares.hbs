@@ -10,7 +10,8 @@
     <label for="searchInput" class="form-label" style="font-weight: bold; color: var(--primary-blue);">
       Buscar un folio:
     </label>
-    <input id="searchInput" class="form-control w-50" oninput="filterTable()" style="max-width: 300px;" placeholder="Buscar...">
+    <input id="searchInput" class="form-control w-50" oninput="filterTable()" style="max-width: 300px;"
+      placeholder="Buscar...">
   </div>
 
   <hr />
@@ -30,19 +31,16 @@
       </thead>
       <tbody id="foliosTableBody">
         {{#each datos}}
-        <tr class="folio-row" 
-            data-folio="{{this.Folio}}" 
-            data-habitacion="{{this.Habitacion}}"
-            data-fecha="{{this.Fecha}}" 
-            data-paciente="{{this.Paciente}}"
-            data-medico="{{this.Medico_Nombre}} {{this.Medico_Apellido_P}} {{this.Medico_Apellido_M}}">
+        <tr class="folio-row" data-folio="{{this.Folio}}" data-habitacion="{{this.Habitacion}}"
+          data-fecha="{{this.Fecha}}" data-paciente="{{this.Paciente}}"
+          data-medico="{{this.Medico_Nombre}} {{this.Medico_Apellido_P}} {{this.Medico_Apellido_M}}">
           <td>{{this.Folio}}</td>
           <td>{{this.Habitacion}}</td>
           <td>{{this.Fecha}}</td>
           <td>{{this.Paciente}}</td>
           <td>{{this.Medico_Nombre}} {{this.Medico_Apellido_P}} {{this.Medico_Apellido_M}}</td>
           <td class="text-center">
-            <a href="../AdministrarFolios/Editar/{{this.Folio}}" class="btn btn-pagos btn-sm">Editar</a>
+            <a href="../AdministrarFolios/EditarFolio/{{this.Folio}}" class="btn btn-pagos btn-sm">Editar</a>
           </td>
         </tr>
         {{/each}}
